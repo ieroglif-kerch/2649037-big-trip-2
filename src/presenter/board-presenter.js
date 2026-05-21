@@ -3,7 +3,9 @@ import FilterView from '../view/filter-view.js';
 import InfoView from '../view/info-view.js';
 import SortView from '../view/sort-view.js';
 import EditFormView from '../view/edit-form-view.js';
-import ItemView from '../view/item-view.js';
+import PointView from '../view/point-view.js';
+
+const RANDOM_POINT = 0;
 
 export default class BoardPresenter {
 
@@ -29,14 +31,16 @@ export default class BoardPresenter {
     listContainer.classList.add('trip-events__list');
     this.sortContainer.append(listContainer);
 
+    this.points = this.wayPointsModel.getPoints();
     // Форма редактирования — первая в списке
-    render(new EditFormView(), listContainer);
-
+    render(new EditFormView({ point: this.points[RANDOM_POINT] }), listContainer);
 
     // Создаем точки маршрута
-    this.points = this.wayPointsModel.getPoints();
+
     for (let i = 0; i < this.points.length; i++) {
-      render(new ItemView({point: this.points[i]}), listContainer);
+      render(new PointView({ point: this.points[i] }), listContainer);
     }
+
+
   }
 }
