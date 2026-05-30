@@ -2,6 +2,7 @@ import { render } from '../framework/render.js';
 import FilterView from '../view/filter-view.js';
 import InfoView from '../view/info-view.js';
 import SortView from '../view/sort-view.js';
+import EmptyList from '../view/list-empty-view.js';
 import PointPresenter from './point-presenter.js';
 import { FilterType, SortType } from '../const.js';
 
@@ -96,26 +97,34 @@ export default class BoardPresenter {
 
   #clearPointsList() {
     const list = this.#sortContainer.querySelector('.trip-events__list');
+    const message = this.#sortContainer.querySelector('.trip-events__msg');
     if (list) {
       list.remove();
+    }
+    if (message) {
+      message.remove();
     }
   }
 
   #renderPointsList() {
-
-    // Создаём контейнер списка
-    const listContainer = document.createElement('ul');
-    listContainer.classList.add('trip-events__list');
-    this.#sortContainer.append(listContainer);
-
     const filteredPoints = this.#getFilteredPoints();
-    this.#points = this.#getSortedPoints(filteredPoints);
+    if(filteredPoints.length > 0){
 
-    this.#points.forEach((point) => {
-      const presenter = new PointPresenter({ pointsModel: this.#wayPointsModel, container: listContainer });
-      presenter.init(
-        point
-      );
-    });
+      // Создаём контейнер списка
+      const listContainer = document.createElement('ul');
+      listContainer.classList.add('trip-events__list');
+      this.#sortContainer.append(listContainer);
+
+      // Создаём точки
+      this.#points = this.#getSortedPoints(filteredPoints);
+      this.#points.forEach((point) => {
+        const presenter = new PointPresenter({ pointsModel: this.#wayPointsModel, container: listContainer });
+        presenter.init(
+          point
+        );
+      });
+    } else {
+      render (new EmptyList(this.#currentFilter), this.#sortContainer);
+    }
   }
 }
