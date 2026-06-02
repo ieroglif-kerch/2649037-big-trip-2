@@ -63,15 +63,15 @@ export default class BoardPresenter {
 
     switch (this.#currentFilter) {
       case FilterType.FUTURE:
-        return points.filter((p) => new Date(p.dateFrom) > now);
+        return points.filter((point) => new Date(point.dateFrom) > now);
 
       case FilterType.PRESENT:
-        return points.filter((p) =>
-          new Date(p.dateFrom) <= now && new Date(p.dateTo) >= now
+        return points.filter((point) =>
+          new Date(point.dateFrom) <= now && new Date(point.dateTo) >= now
         );
 
       case FilterType.PAST:
-        return points.filter((p) => new Date(p.dateTo) < now);
+        return points.filter((point) => new Date(point.dateTo) < now);
 
       default:
         return points;
@@ -81,17 +81,17 @@ export default class BoardPresenter {
   #getSortedPoints(points) {
     switch (this.#currentSort) {
       case SortType.PRICE:
-        return [...points].sort((a, b) => b.basePrice - a.basePrice);
+        return [...points].sort((pointA, pointB) => pointB.basePrice - pointA.basePrice);
 
       case SortType.TIME:
-        return [...points].sort((a, b) => {
-          const durationA = new Date(a.dateTo) - new Date(a.dateFrom);
-          const durationB = new Date(b.dateTo) - new Date(b.dateFrom);
+        return [...points].sort((pointA, pointB) => {
+          const durationA = new Date(pointA.dateTo) - new Date(pointA.dateFrom);
+          const durationB = new Date(pointB.dateTo) - new Date(pointB.dateFrom);
           return durationB - durationA;
         });
 
       default: // DAY
-        return [...points].sort((a, b) => new Date(a.dateFrom) - new Date(b.dateFrom));
+        return [...points].sort((pointA, pointB) => new Date(pointA.dateFrom) - new Date(pointB.dateFrom));
     }
   }
 
