@@ -2,7 +2,7 @@ import { render, remove } from '../framework/render.js';
 import FilterView from '../view/filter-view.js';
 import InfoView from '../view/info-view.js';
 import SortView from '../view/sort-view.js';
-import EmptyList from '../view/list-empty-view.js';
+import EmptyList from '../view/empty-list-view.js';
 import PointPresenter from './point-presenter.js';
 import { FilterType, SortType } from '../const.js';
 import { updateItem } from '../utils.js';
@@ -34,43 +34,13 @@ export default class BoardPresenter {
     render(new InfoView(), this.#infoContainer, 'afterbegin');
 
     // Рендер фильтров
-    render(
-      new FilterView({
-        onFilterChange: this.#handleFilterChange
-      }),
-      this.#filterContainer
-    );
+    render(new FilterView({onFilterChange: this.#handleFilterChange}),this.#filterContainer);
 
     // Рендер сортировки
-    render(
-      new SortView({
-        onSortChange: this.#handleSortChange
-      }), this.#sortContainer);
+    render(new SortView({onSortChange: this.#handleSortChange}), this.#sortContainer);
 
     this.#renderPointsList();
   }
-
-  #handleModeChange = () => {
-    this.#pointPresenters.forEach((presenter) => presenter.resetView());
-  };
-
-  #handleFilterChange = (filterType) => {
-    this.#currentFilter = filterType;
-    this.#currentSort = SortType.DAY; // сброс сортировки
-    this.#clearPointsList();
-    this.#renderPointsList();
-  };
-
-  #handleSortChange = (sortType) => {
-    this.#currentSort = sortType;
-    this.#clearPointsList();
-    this.#renderPointsList();
-  };
-
-  #handlePointChange = (updatedPoint) => {
-    this.#points = updateItem(this.#points, updatedPoint);
-    this.#pointPresenters.get(updatedPoint.id).init(updatedPoint);
-  };
 
   #getFilteredPoints() {
     const points = this.#wayPointsModel.getPoints();
@@ -105,7 +75,7 @@ export default class BoardPresenter {
           return durationB - durationA;
         });
 
-      default: // DAY
+      default:
         return [...points].sort((pointA, pointB) => new Date(pointA.dateFrom) - new Date(pointB.dateFrom));
     }
   }
@@ -123,7 +93,6 @@ export default class BoardPresenter {
     const filteredPoints = this.#getFilteredPoints();
 
     if(filteredPoints.length > 0){
-
       // Создаём контейнер списка
       const listContainer = document.createElement('ul');
       listContainer.classList.add('trip-events__list');
@@ -143,9 +112,32 @@ export default class BoardPresenter {
         );
         this.#pointPresenters.set(point.id, presenter);
       });
+      // Если нет точек, показываем сообщение
     } else {
       this.#message = new EmptyList(this.#currentFilter);
       render(this.#message, this.#sortContainer);
     }
   }
+
+  #handleModeChange = () => {
+    this.#pointPresenters.forEach((presenter) => presenter.resetView());
+  };
+
+  #handleFilterChange = (filterType) => {
+    this.#currentFilter = filterType;
+    this.#currentSort = SortType.DAY; // сброс сортировки
+    this.#clearPointsList();
+    this.#renderPointsList();
+  };
+
+  #handleSortChange = (sortType) => {
+    this.#currentSort = sortType;
+    this.#clearPointsList();
+    this.#renderPointsList();
+  };
+
+  #handlePointChange = (updatedPoint) => {
+    this.#points = updateItem(this.#points, updatedPoint);
+    this.#pointPresenters.get(updatedPoint.id).init(updatedPoint);
+  };
 }
