@@ -14,7 +14,7 @@ export default class WayPointsModel extends Observable {
   updatePoint(updateType, update) {
     const index = this.#wayPoints.findIndex((point) => point.id === update.id);
 
-    if (index === -1) {
+    if (!~index) {
       throw new Error('Can\'t update unexacting point');
     }
 
@@ -71,10 +71,10 @@ export default class WayPointsModel extends Observable {
   }
 
   getOffersForPoint = (point) => {
-    const eventData = this.getEventByType(point.type);
+    const eventType = this.getEventByType(point.type);
 
     return point.offers
-      .map((offerId) => eventData.offers.find((offer) => offer.id === offerId))
+      .map((offerId) => eventType.offers.find((offer) => offer.id === offerId))
       .filter(Boolean); // на случай, если id нет
   };
 
