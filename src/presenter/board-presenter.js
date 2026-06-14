@@ -9,7 +9,7 @@ import { FilterType, SortType, UpdateType, UserAction } from '../const.js';
 export default class BoardPresenter {
   #infoContainer = {};
   #filterContainer = {};
-  #sortContainer = {};
+  #boardContainer = {};
   #wayPointsModel = {};
 
   #currentFilter = FilterType.EVERYTHING;
@@ -20,10 +20,10 @@ export default class BoardPresenter {
   #pointPresenters = new Map();
   #message = null;
 
-  constructor({ infoContainer, filterContainer, sortContainer, wayPointsModel }) {
+  constructor({ infoContainer, boardContainer, wayPointsModel }) {
     this.#infoContainer = infoContainer;
-    this.#filterContainer = filterContainer;
-    this.#sortContainer = sortContainer;
+    this.#boardContainer = boardContainer;
+    this.#filterContainer = this.#infoContainer.querySelector('.trip-controls__filters');
     this.#wayPointsModel = wayPointsModel;
 
     this.#wayPointsModel.addObserver(this.#handleModelEvent);
@@ -83,7 +83,7 @@ export default class BoardPresenter {
 
   #renderSortView() {
     this.#sortView = new SortView({ onSortChange: this.#handleSortChange });
-    render(this.#sortView, this.#sortContainer);
+    render(this.#sortView, this.#boardContainer);
   }
 
   #clearPointsList({ resetSortType = false } = {}) {
@@ -113,7 +113,7 @@ export default class BoardPresenter {
     // Создаём контейнер списка
     this.#listContainer = document.createElement('ul');
     this.#listContainer.classList.add('trip-events__list');
-    this.#sortContainer.append(this.#listContainer);
+    this.#boardContainer.append(this.#listContainer);
 
     // Создаём точки
     this.points.forEach((point) => {
@@ -132,7 +132,7 @@ export default class BoardPresenter {
 
   #renderEmptyList() {
     this.#message = new EmptyList(this.#currentFilter);
-    render(this.#message, this.#sortContainer);
+    render(this.#message, this.#boardContainer);
   }
 
   #handleModeChange = () => {
