@@ -40,7 +40,7 @@ function createEditFormTemplate(point, allOffers, destinationsList) {
   `).join('');
 
   const destinationsOptions = destinationsList
-    .map((d) => `<option value="${d.name}"></option>`)
+    .map((currentDestination) => `<option value="${currentDestination.name}"></option>`)
     .join('');
 
   const photosTemplate = destinationPictures.length
@@ -162,7 +162,6 @@ export default class EditFormView extends AbstractPointFormView {
     this.#onFormSubmit = onFormSubmit;
     this.#onRollupClick = onRollupClick;
 
-    // this._restoreHandlers();
   }
 
   get template() {

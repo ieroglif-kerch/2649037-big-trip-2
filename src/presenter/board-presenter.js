@@ -4,6 +4,7 @@ import InfoView from '../view/info-view.js';
 import SortView from '../view/sort-view.js';
 import EmptyList from '../view/empty-list-view.js';
 import PointPresenter from './point-presenter.js';
+import NewPointPresenter from './new-point-presenter.js';
 import { FilterType, SortType, UpdateType, UserAction } from '../const.js';
 
 export default class BoardPresenter {
@@ -15,9 +16,13 @@ export default class BoardPresenter {
   #currentFilter = FilterType.EVERYTHING;
   #currentSortType = SortType.DAY;
   #sortView = null;
+  #filterView = null;
   #listContainer = null;
 
   #pointPresenters = new Map();
+  #newEventButton = null;
+  #newPointPresenter = null;
+
   #message = null;
 
   constructor({ infoContainer, boardContainer, wayPointsModel }) {
@@ -49,12 +54,19 @@ export default class BoardPresenter {
   }
 
   init() {
+    // Кнопка "New event"
+    this.#newEventButton = this.#infoContainer.querySelector('.trip-main__event-add-btn');
+
+    this.#newEventButton.addEventListener('click', () => {
+      this.#newPointClickHandler();
+    });
 
     // Рендер информации о маршруте
     render(new InfoView(), this.#infoContainer, 'afterbegin');
 
     // Рендер фильтров
-    render(new FilterView({ onFilterChange: this.#handleFilterChange }), this.#filterContainer);
+    this.#filterView = new FilterView({ onFilterChange: this.#handleFilterChange });
+    render(this.#filterView, this.#filterContainer);
 
 
     this.#renderPointsList();
@@ -84,7 +96,6 @@ export default class BoardPresenter {
   #renderSortView() {
     this.#sortView = new SortView({ onSortChange: this.#handleSortChange });
     render(this.#sortView, this.#boardContainer, 'afterbegin');
-
   }
 
   #clearPointsList(resetSortType = false) {
@@ -103,6 +114,10 @@ export default class BoardPresenter {
       this.#listContainer = null;
     }
 
+    if (this.#newPointPresenter !== null) {
+      this.#destroyNewPointForm();
+    }
+
     if (resetSortType) {
       remove(this.#sortView);
       this.#sortView = null;
@@ -115,7 +130,7 @@ export default class BoardPresenter {
     if (this.points.length !== 0) {
 
       // Рендер сортировки
-      if(!this.#sortView) {
+      if (!this.#sortView) {
         this.#renderSortView();
       }
 
@@ -149,6 +164,10 @@ export default class BoardPresenter {
 
   #handleModeChange = () => {
     this.#pointPresenters.forEach((presenter) => presenter.resetView());
+
+    if (this.#newPointPresenter !== null) {
+      this.#destroyNewPointForm();
+    }
   };
 
   #handleFilterChange = (filterType) => {
@@ -189,19 +208,64 @@ export default class BoardPresenter {
     // В зависимости от типа изменений решаем, что делать:
     switch (updateType) {
       case UpdateType.PATCH:
-        // - обновить часть списка (например, когда поменялось описание)
+        // - обновить часть списка
         this.#pointPresenters.get(data.id).init(data);
         break;
       case UpdateType.MINOR:
-        // - обновить список (например, когда задача ушла в архив)
+        // - обновить список
         this.#clearPointsList();
         this.#renderPointsList();
         break;
       case UpdateType.MAJOR:
-        // - обновить всю доску (например, при переключении фильтра)
+        // - обновить всю доску
         this.#clearPointsList({ resetSortType: true });
         this.#renderPointsList();
         break;
     }
   };
+
+  #newPointClickHandler = () => {
+    if (this.#newPointPresenter !== null) {
+      return;
+    }
+
+    this.#sortView.reset();
+    this.#filterView.reset();
+
+    this.#newPointPresenter = new NewPointPresenter({
+      container: this.#listContainer,
+      offers: this.#wayPointsModel.events,
+      destinations: this.#wayPointsModel.destinations,
+      onSubmit: this.#handleNewPointSubmit,
+      onCancel: this.#handleNewPointCancel
+    });
+
+    this.#newPointPresenter.init();
+    this.#newEventButton.disabled = true;
+  };
+
+  #handleNewPointSubmit = (newPoint) => {
+    this.#handleViewAction(
+      UserAction.ADD_POINT,
+      UpdateType.MINOR,
+      newPoint
+    );
+
+    this.#destroyNewPointForm();
+  };
+
+  #handleNewPointCancel = () => {
+    this.#destroyNewPointForm();
+  };
+
+  #destroyNewPointForm() {
+    if (this.#newPointPresenter === null) {
+      return;
+    }
+
+    this.#newPointPresenter.destroy();
+    this.#newPointPresenter = null;
+
+    this.#newEventButton.disabled = false;
+  }
 }

@@ -39,4 +39,13 @@ const UpdateType = {
   MAJOR: 'MAJOR',
 };
 
-export {PRICE, POINTS_COUNT, DATA_DATES, FilterType, SortType, UserAction, UpdateType};
+const POINT_EMPTY = {
+  type: 'flight',
+  destination: null,
+  dateFrom: new Date(),
+  dateTo: new Date(),
+  basePrice: 0,
+  offers: []
+};
+
+export {PRICE, POINTS_COUNT, DATA_DATES, FilterType, SortType, UserAction, UpdateType, POINT_EMPTY};
