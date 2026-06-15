@@ -1,6 +1,7 @@
 import AbstractPointFormView from './abstract-point-form-view.js';
 import { POINT_EMPTY } from '../const.js';
 import dayjs from 'dayjs';
+import { nanoid } from 'nanoid';
 
 function createNewPointFormTemplate(state, allOffers, destinationsList) {
   const {
@@ -71,7 +72,7 @@ function createNewPointFormTemplate(state, allOffers, destinationsList) {
           >
 
           <datalist id="destination-list-new">
-            ${destinationsList.map((destinationItem) =>`
+            ${destinationsList.map((destinationItem) => `
               <option value="${destinationItem.name}"></option>`).join('')}
           </datalist>
         </div>
@@ -152,7 +153,7 @@ function createNewPointFormTemplate(state, allOffers, destinationsList) {
 
             <div class="event__photos-container">
               <div class="event__photos-tape">
-                ${destinationData.pictures.map((pictureItem) =>`
+                ${destinationData.pictures.map((pictureItem) => `
                   <img class="event__photo" src="${pictureItem.src}" alt="${pictureItem.description}">`).join('')}
               </div>
             </div>
@@ -236,5 +237,12 @@ export default class NewPointFormView extends AbstractPointFormView {
       (date) => this._setState({ dateFrom: date }),
       (date) => this._setState({ dateTo: date })
     );
+  }
+
+  static parseStateToPoint(state) {
+    return {
+      ...state,
+      id: nanoid()
+    };
   }
 }
