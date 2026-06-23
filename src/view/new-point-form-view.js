@@ -3,6 +3,8 @@ import { POINT_EMPTY } from '../const.js';
 import dayjs from 'dayjs';
 import { nanoid } from 'nanoid';
 
+import he from 'he';
+
 function createNewPointFormTemplate(state, allOffers, destinationsList) {
   const {
     type,
@@ -14,7 +16,7 @@ function createNewPointFormTemplate(state, allOffers, destinationsList) {
   } = state;
 
   const destinationData = destinationsList.find((destinationItem) => destinationItem.id === destination) || {};
-  const destinationName = destinationData.name || '';
+  const destinationName = he.encode(destinationData.name || ''); // ← экранирование
 
   const offersForType = allOffers.find((offerGroup) => offerGroup.type === type);
   const availableOffers = offersForType ? offersForType.offers : [];
@@ -27,7 +29,7 @@ function createNewPointFormTemplate(state, allOffers, destinationsList) {
         <div class="event__type-wrapper">
           <label class="event__type event__type-btn" for="event-type-toggle-new">
             <span class="visually-hidden">Choose event type</span>
-            <img class="event__type-icon" width="17" height="17" src="img/icons/${type}.png" alt="Event type icon">
+            <img class="event__type-icon" width="17" height="17" src="img/icons/${he.encode(type)}.png" alt="Event type icon"> 
           </label>
           <input class="event__type-toggle visually-hidden" id="event-type-toggle-new" type="checkbox">
 
@@ -38,18 +40,18 @@ function createNewPointFormTemplate(state, allOffers, destinationsList) {
               ${allOffers.map((offerGroup) => `
                 <div class="event__type-item">
                   <input
-                    id="event-type-${offerGroup.type}-new"
+                    id="event-type-${he.encode(offerGroup.type)}-new"
                     class="event__type-input visually-hidden"
                     type="radio"
                     name="event-type"
-                    value="${offerGroup.type}"
+                    value="${he.encode(offerGroup.type)}"
                     ${offerGroup.type === type ? 'checked' : ''}
                   >
                   <label
-                    class="event__type-label event__type-label--${offerGroup.type}"
-                    for="event-type-${offerGroup.type}-new"
+                    class="event__type-label event__type-label--${he.encode(offerGroup.type)}"
+                    for="event-type-${he.encode(offerGroup.type)}-new"
                   >
-                    ${offerGroup.type}
+                    ${he.encode(offerGroup.type)}
                   </label>
                 </div>
               `).join('')}
@@ -60,7 +62,7 @@ function createNewPointFormTemplate(state, allOffers, destinationsList) {
         <!-- DESTINATION -->
         <div class="event__field-group event__field-group--destination">
           <label class="event__label event__type-output" for="event-destination-new">
-            ${type}
+            ${he.encode(type)}
           </label>
           <input
             class="event__input event__input--destination"
@@ -73,7 +75,7 @@ function createNewPointFormTemplate(state, allOffers, destinationsList) {
 
           <datalist id="destination-list-new">
             ${destinationsList.map((destinationItem) => `
-              <option value="${destinationItem.name}"></option>`).join('')}
+              <option value="${he.encode(destinationItem.name)}"></option>`).join('')}
           </datalist>
         </div>
 
@@ -85,8 +87,7 @@ function createNewPointFormTemplate(state, allOffers, destinationsList) {
             id="event-start-time-new"
             type="text"
             name="event-start-time"
-            value="${dateFrom ? dayjs(dateFrom).format('DD/MM/YY HH:mm') : ''}"
-
+            value="${dateFrom ? he.encode(dayjs(dateFrom).format('DD/MM/YY HH:mm')) : ''}"
           >
 
           &mdash;
@@ -97,7 +98,7 @@ function createNewPointFormTemplate(state, allOffers, destinationsList) {
             id="event-end-time-new"
             type="text"
             name="event-end-time"
-            value="${dateFrom ? dayjs(dateFrom).format('DD/MM/YY HH:mm') : ''}"
+            value="${dateTo ? he.encode(dayjs(dateTo).format('DD/MM/YY HH:mm')) : ''}"
           >
         </div>
 
@@ -112,7 +113,7 @@ function createNewPointFormTemplate(state, allOffers, destinationsList) {
             id="event-price-new"
             type="text"
             name="event-price"
-            value="${basePrice}"
+            value="${he.encode(String(basePrice))}"
           >
         </div>
 
@@ -137,8 +138,8 @@ function createNewPointFormTemplate(state, allOffers, destinationsList) {
                     ${offers.includes(offerItem.id) ? 'checked' : ''}
                   >
                   <label class="event__offer-label" for="event-offer-${offerItem.id}-new">
-                    <span class="event__offer-title">${offerItem.title}</span>
-                    &plus;&euro;&nbsp;<span class="event__offer-price">${offerItem.price}</span>
+                    <span class="event__offer-title">${he.encode(offerItem.title)}</span>
+                    &plus;&euro;&nbsp;<span class="event__offer-price">${he.encode(String(offerItem.price))}</span>
                   </label>
                 </div>
               `).join('')}
@@ -150,12 +151,12 @@ function createNewPointFormTemplate(state, allOffers, destinationsList) {
         ${destinationData.description ? `
           <section class="event__section event__section--destination">
             <h3 class="event__section-title event__section-title--destination">Destination</h3>
-            <p class="event__destination-description">${destinationData.description}</p>
+            <p class="event__destination-description">${he.encode(destinationData.description)}</p>
 
             <div class="event__photos-container">
               <div class="event__photos-tape">
                 ${destinationData.pictures.map((pictureItem) => `
-                  <img class="event__photo" src="${pictureItem.src}" alt="${pictureItem.description}">`).join('')}
+                  <img class="event__photo" src="${he.encode(pictureItem.src)}" alt="${he.encode(pictureItem.description)}">`).join('')}
               </div>
             </div>
           </section>

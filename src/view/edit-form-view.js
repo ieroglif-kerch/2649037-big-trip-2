@@ -1,6 +1,8 @@
 import AbstractPointFormView from './abstract-point-form-view.js';
 import dayjs from 'dayjs';
 
+import he from 'he'; // ← добавлено
+
 function createEditFormTemplate(point, allOffers, destinationsList) {
   const {
     type,
@@ -33,14 +35,14 @@ function createEditFormTemplate(point, allOffers, destinationsList) {
         ${selectedOfferIds.includes(offer.id) ? 'checked' : ''}
       >
       <label class="event__offer-label" for="event-offer-${offer.id}">
-        <span class="event__offer-title">${offer.title}</span>
-        &plus;&euro;&nbsp;<span class="event__offer-price">${offer.price}</span>
+        <span class="event__offer-title">${he.encode(offer.title)}</span>
+        &plus;&euro;&nbsp;<span class="event__offer-price">${he.encode(String(offer.price))}</span>
       </label>
     </div>
   `).join('');
 
   const destinationsOptions = destinationsList
-    .map((currentDestination) => `<option value="${currentDestination.name}"></option>`)
+    .map((currentDestination) => `<option value="${he.encode(currentDestination.name)}"></option>`)
     .join('');
 
   const photosTemplate = destinationPictures.length
@@ -48,7 +50,7 @@ function createEditFormTemplate(point, allOffers, destinationsList) {
       <div class="event__photos-container">
         <div class="event__photos-tape">
           ${destinationPictures.map((picture) => `
-            <img class="event__photo" src="${picture.src}" alt="${picture.description}">
+            <img class="event__photo" src="${he.encode(picture.src)}" alt="${he.encode(picture.description)}">
           `).join('')}
         </div>
       </div>
@@ -63,7 +65,7 @@ function createEditFormTemplate(point, allOffers, destinationsList) {
           <label class="event__type  event__type-btn" for="event-type-toggle-1">
             <span class="visually-hidden">Choose event type</span>
             <img class="event__type-icon" width="17" height="17"
-              src="img/icons/${type}.png" alt="Event type icon">
+              src="img/icons/${he.encode(type)}.png" alt="Event type icon">
           </label>
           <input class="event__type-toggle visually-hidden" id="event-type-toggle-1" type="checkbox">
 
@@ -78,7 +80,7 @@ function createEditFormTemplate(point, allOffers, destinationsList) {
                       type="radio" name="event-type" value="${offerType}"
                       ${type === offerType ? 'checked' : ''}>
                     <label class="event__type-label event__type-label--${offerType}"
-                      for="event-type-${offerType}-1">${offerType[0].toUpperCase() + offerType.slice(1)}</label>
+                      for="event-type-${offerType}-1">${he.encode(offerType[0].toUpperCase() + offerType.slice(1))}</label>
                   </div>
                 `).join('')}
             </fieldset>
@@ -87,11 +89,11 @@ function createEditFormTemplate(point, allOffers, destinationsList) {
 
         <div class="event__field-group event__field-group--destination">
           <label class="event__label event__type-output" for="event-destination-1">
-            ${type}
+            ${he.encode(type)}
           </label>
           <input class="event__input event__input--destination"
             id="event-destination-1" type="text" name="event-destination"
-            value="${destinationName}" list="destination-list-1">
+            value="${he.encode(destinationName)}" list="destination-list-1">
 
           <datalist id="destination-list-1">
             ${destinationsOptions}
@@ -101,18 +103,18 @@ function createEditFormTemplate(point, allOffers, destinationsList) {
         <div class="event__field-group event__field-group--time">
           <input class="event__input event__input--time"
             id="event-start-time-1" type="text" name="event-start-time"
-            value="${format(dateFrom)}">
+            value="${he.encode(format(dateFrom))}">
           &mdash;
           <input class="event__input event__input--time"
             id="event-end-time-1" type="text" name="event-end-time"
-            value="${format(dateTo)}">
+            value="${he.encode(format(dateTo))}">
         </div>
 
         <div class="event__field-group event__field-group--price">
           <label class="event__label" for="event-price-1">&euro;</label>
           <input class="event__input event__input--price"
             id="event-price-1" type="text" name="event-price"
-            value="${basePrice}">
+            value="${he.encode(String(basePrice))}">
         </div>
 
         <button class="event__save-btn btn btn--blue" type="submit">Save</button>
@@ -137,7 +139,7 @@ function createEditFormTemplate(point, allOffers, destinationsList) {
         ${destinationDescription ? `
           <section class="event__section event__section--destination">
             <h3 class="event__section-title event__section-title--destination">Destination</h3>
-            <p class="event__destination-description">${destinationDescription}</p>
+            <p class="event__destination-description">${he.encode(destinationDescription)}</p>
             ${photosTemplate}
           </section>
         ` : ''}
