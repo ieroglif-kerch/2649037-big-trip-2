@@ -42,7 +42,7 @@ function createEditFormTemplate(point, allOffers, destinationsList) {
   `).join('');
 
   const destinationsOptions = destinationsList
-    .map((currentDestination) => `<option value="${he.encode(currentDestination.name)}"></option>`)
+    .map((currentDestination) => `<option data-destination-id ="${currentDestination.id}">${he.encode(currentDestination.name)}</option>`)
     .join('');
 
   const photosTemplate = destinationPictures.length
@@ -58,7 +58,7 @@ function createEditFormTemplate(point, allOffers, destinationsList) {
     : '';
 
   return `
-    <form class="event event--edit" action="#" method="post">
+    <form class="event event--edit" action="#" method="post"  autocomplete="off">
       <header class="event__header">
 
         <div class="event__type-wrapper">
@@ -93,7 +93,7 @@ function createEditFormTemplate(point, allOffers, destinationsList) {
           </label>
           <input class="event__input event__input--destination"
             id="event-destination-1" type="text" name="event-destination"
-            value="${he.encode(destinationName)}" list="destination-list-1" autocomplete="off">
+            value="${he.encode(destinationName)}" list="destination-list-1">
 
           <datalist id="destination-list-1">
             ${destinationsOptions}
@@ -174,11 +174,6 @@ export default class EditFormView extends AbstractPointFormView {
     );
   }
 
-  updateElement(update) {
-    super.updateElement(update);
-    this._restoreHandlers();
-  }
-
   reset(point) {
     this.updateElement(EditFormView.parsePointToState(point));
   }
@@ -235,10 +230,12 @@ export default class EditFormView extends AbstractPointFormView {
   };
 
   #destinationChangeHandler = (evt) => {
-    evt.preventDefault();
-    const name = evt.target.value;
-    const found = this.#destinationsList.find((d) => d.name === name);
-    this.updateElement({ destination: found?.id || null });
+    const destination = this.#destinationsList.find(
+      (currentDestination) => currentDestination.name === evt.target.value);
+    if(!destination){
+      return;
+    }
+    this.updateElement({ destination: destination.id});
   };
 
   #formDeleteHandler = (evt) => {

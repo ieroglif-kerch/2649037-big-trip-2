@@ -35,7 +35,7 @@ function createNewPointFormTemplate(state, allOffers, destinationsList) {
                 </div>
               `).join('');
   return `
-    <form class="event event--edit" action="#" method="post">
+    <form class="event event--edit" action="#" method="post"  autocomplete="off">
       <header class="event__header">
 
         <!-- TYPE -->
