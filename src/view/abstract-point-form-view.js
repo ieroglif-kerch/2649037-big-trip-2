@@ -75,19 +75,9 @@ export default class AbstractPointFormView extends AbstractStatefulView {
     }
   }
 
-  _handleOffersChange(evt) {
-    const checkbox = evt.target;
-    const offerId = Number(checkbox.dataset.offerId);
-
-    let updatedOffers;
-
-    if (checkbox.checked) {
-      updatedOffers = [...this._state.offers, offerId];
-    } else {
-      updatedOffers = this._state.offers.filter((id) => id !== offerId);
-    }
-
-    this._setState({ offers: updatedOffers });
+  _handleOffersChange() {
+    const offersChecked = document.querySelectorAll('.event__offer-checkbox:checked');
+    this._setState({ offers: [...offersChecked]?.map((offer) => offer.value) });
   }
 
   _handleDestinationChange(evt, list) {

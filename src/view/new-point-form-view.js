@@ -19,7 +19,21 @@ function createNewPointFormTemplate(state, allOffers, destinationsList) {
 
   const offersForType = allOffers.find((offerGroup) => offerGroup.type === type);
   const availableOffers = offersForType ? offersForType.offers : [];
-
+  const offersTemplate = availableOffers.map((offerItem) => `
+                <div class="event__offer-selector">
+                  <input
+                    class="event__offer-checkbox visually-hidden"
+                    id="event-offer-${offerItem.id}-new"
+                    type="checkbox"
+                    value="${offerItem.id}"
+                    ${offers.includes(offerItem.id) ? 'checked' : ''}
+                  >
+                  <label class="event__offer-label" for="event-offer-${offerItem.id}-new">
+                    <span class="event__offer-title">${he.encode(offerItem.title)}</span>
+                    &plus;&euro;&nbsp;<span class="event__offer-price">${he.encode(String(offerItem.price))}</span>
+                  </label>
+                </div>
+              `).join('');
   return `
     <form class="event event--edit" action="#" method="post">
       <header class="event__header">
@@ -127,21 +141,7 @@ function createNewPointFormTemplate(state, allOffers, destinationsList) {
           <section class="event__section event__section--offers">
             <h3 class="event__section-title event__section-title--offers">Offers</h3>
             <div class="event__available-offers">
-              ${availableOffers.map((offerItem) => `
-                <div class="event__offer-selector">
-                  <input
-                    class="event__offer-checkbox visually-hidden"
-                    id="event-offer-${offerItem.id}-new"
-                    type="checkbox"
-                    data-offer-id="${offerItem.id}"
-                    ${offers.includes(offerItem.id) ? 'checked' : ''}
-                  >
-                  <label class="event__offer-label" for="event-offer-${offerItem.id}-new">
-                    <span class="event__offer-title">${he.encode(offerItem.title)}</span>
-                    &plus;&euro;&nbsp;<span class="event__offer-price">${he.encode(String(offerItem.price))}</span>
-                  </label>
-                </div>
-              `).join('')}
+              ${offersTemplate}
             </div>
           </section>
         ` : ''}
@@ -239,9 +239,5 @@ export default class NewPointFormView extends AbstractPointFormView {
     );
   }
 
-  static parseStateToPoint(state) {
-    return {
-      ...state,
-    };
-  }
+
 }

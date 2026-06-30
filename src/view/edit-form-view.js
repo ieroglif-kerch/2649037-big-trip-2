@@ -31,7 +31,7 @@ function createEditFormTemplate(point, allOffers, destinationsList) {
         class="event__offer-checkbox visually-hidden"
         id="event-offer-${offer.id}"
         type="checkbox"
-        data-offer-id="${offer.id}"
+        value="${offer.id}"
         ${selectedOfferIds.includes(offer.id) ? 'checked' : ''}
       >
       <label class="event__offer-label" for="event-offer-${offer.id}">
@@ -93,7 +93,7 @@ function createEditFormTemplate(point, allOffers, destinationsList) {
           </label>
           <input class="event__input event__input--destination"
             id="event-destination-1" type="text" name="event-destination"
-            value="${he.encode(destinationName)}" list="destination-list-1">
+            value="${he.encode(destinationName)}" list="destination-list-1" autocomplete="off">
 
           <datalist id="destination-list-1">
             ${destinationsOptions}
