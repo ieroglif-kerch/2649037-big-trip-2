@@ -17,16 +17,6 @@ export default class AbstractPointFormView extends AbstractStatefulView {
     this.updateElement(AbstractPointFormView.parsePointToState(point));
   }
 
-  _formatDate(date) {
-    return dayjs(date).format('DD/MM/YY HH:mm');
-  }
-
-  // Общие обработчики
-  _handleTypeChange(evt) {
-    evt.preventDefault();
-    this.updateElement({ type: evt.target.value });
-  }
-
   // Общий календарь
   _initDatepickers(startSelector, endSelector, state, onStart, onEnd) {
     if (this.#startDatepicker) {
@@ -46,6 +36,7 @@ export default class AbstractPointFormView extends AbstractStatefulView {
       minDate: 'today',
       onChange: ([date]) => {
         onStart(date);
+        this._validateForm();
         this.#endDatepicker.set('minDate', date);// обновляем ограничение конца
         if (this._state.dateTo < date) {
           // если конец уже раньше старта — двигаем конец
@@ -61,8 +52,57 @@ export default class AbstractPointFormView extends AbstractStatefulView {
       dateFormat: 'd/m/y H:i',
       defaultDate: state.dateTo,
       minDate: state.dateFrom,
-      onChange: ([date]) => onEnd(date)
+      onChange: ([date]) => {
+        onEnd(date);
+        this._validateForm();
+      }
     });
+  }
+
+  _formatDate(date) {
+    return dayjs(date).format('DD/MM/YY HH:mm');
+  }
+
+  // Общие обработчики
+  _handleTypeChange(evt) {
+    evt.preventDefault();
+    this.updateElement({ type: evt.target.value });
+  }
+
+  _handleOffersChange() {
+    const offersChecked = document.querySelectorAll('.event__offer-checkbox:checked');
+    this._setState({ offers: [...offersChecked]?.map((offer) => offer.value) });
+  }
+
+  _handleDestinationChange(evt, destinationsList) {
+    const name = evt.target.value.trim();
+
+    // Ищем ID по имени
+    const destinationId = this._getDestinationIdByName(name, destinationsList);
+
+    // Если город не найден — валидируем форму
+    if (destinationId === null) {
+      this._setState({ destination: null });
+      this._validateForm();
+      return;
+    }
+
+    // Если найден — обновляем форму
+    this.updateElement({ destination: destinationId });
+  }
+
+
+  _handlePriceChange(evt) {
+    // Удаляем всё, что не цифры
+    evt.target.value = evt.target.value.replace(/\D/g, '');
+
+    // Преобразуем в число
+    const price = Number(evt.target.value);
+
+    this._setState({
+      basePrice: price
+    });
+    this._validateForm();
   }
 
   removeElement() {
@@ -75,38 +115,18 @@ export default class AbstractPointFormView extends AbstractStatefulView {
     }
   }
 
-  _handleOffersChange(evt) {
-    const checkbox = evt.target;
-    const offerId = Number(checkbox.dataset.offerId);
+  _validateForm() {
+    const saveButton = this.element.querySelector('.event__save-btn');
 
-    let updatedOffers;
+    const { destination, dateFrom, dateTo, basePrice } = this._state;
 
-    if (checkbox.checked) {
-      updatedOffers = [...this._state.offers, offerId];
-    } else {
-      updatedOffers = this._state.offers.filter((id) => id !== offerId);
-    }
+    const isValid =
+      destination !== null &&
+      dateFrom !== null &&
+      dateTo !== null &&
+      Number(basePrice) > 0;
 
-    this._setState({ offers: updatedOffers });
-  }
-
-  _handleDestinationChange(evt, list) {
-    evt.preventDefault();
-    const id = this._getDestinationIdByName(evt.target.value, list);
-    this.updateElement({ destination: id });
-  }
-
-  _handlePriceChange(evt) {
-    // Удаляем всё, что не цифры
-    evt.target.value = evt.target.value.replace(/\D/g, '');
-
-    // Преобразуем в число
-    const price = Number(evt.target.value);
-
-    this._setState({
-      basePrice: price
-    });
-
+    saveButton.disabled = !isValid;
   }
 
   // Общий парсинг

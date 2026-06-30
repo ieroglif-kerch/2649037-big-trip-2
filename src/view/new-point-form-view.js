@@ -1,7 +1,8 @@
 import AbstractPointFormView from './abstract-point-form-view.js';
 import { POINT_EMPTY } from '../const.js';
 import dayjs from 'dayjs';
-import { nanoid } from 'nanoid';
+
+import he from 'he';
 
 function createNewPointFormTemplate(state, allOffers, destinationsList) {
   const {
@@ -14,20 +15,34 @@ function createNewPointFormTemplate(state, allOffers, destinationsList) {
   } = state;
 
   const destinationData = destinationsList.find((destinationItem) => destinationItem.id === destination) || {};
-  const destinationName = destinationData.name || '';
+  const destinationName = he.encode(destinationData.name || ''); // ← экранирование
 
   const offersForType = allOffers.find((offerGroup) => offerGroup.type === type);
   const availableOffers = offersForType ? offersForType.offers : [];
-
+  const offersTemplate = availableOffers.map((offerItem) => `
+                <div class="event__offer-selector">
+                  <input
+                    class="event__offer-checkbox visually-hidden"
+                    id="event-offer-${offerItem.id}-new"
+                    type="checkbox"
+                    value="${offerItem.id}"
+                    ${offers.includes(offerItem.id) ? 'checked' : ''}
+                  >
+                  <label class="event__offer-label" for="event-offer-${offerItem.id}-new">
+                    <span class="event__offer-title">${he.encode(offerItem.title)}</span>
+                    &plus;&euro;&nbsp;<span class="event__offer-price">${he.encode(String(offerItem.price))}</span>
+                  </label>
+                </div>
+              `).join('');
   return `
-    <form class="event event--edit" action="#" method="post">
+    <form class="event event--edit" action="#" method="post"  autocomplete="off">
       <header class="event__header">
 
         <!-- TYPE -->
         <div class="event__type-wrapper">
           <label class="event__type event__type-btn" for="event-type-toggle-new">
             <span class="visually-hidden">Choose event type</span>
-            <img class="event__type-icon" width="17" height="17" src="img/icons/${type}.png" alt="Event type icon">
+            <img class="event__type-icon" width="17" height="17" src="img/icons/${he.encode(type)}.png" alt="Event type icon">
           </label>
           <input class="event__type-toggle visually-hidden" id="event-type-toggle-new" type="checkbox">
 
@@ -38,18 +53,18 @@ function createNewPointFormTemplate(state, allOffers, destinationsList) {
               ${allOffers.map((offerGroup) => `
                 <div class="event__type-item">
                   <input
-                    id="event-type-${offerGroup.type}-new"
+                    id="event-type-${he.encode(offerGroup.type)}-new"
                     class="event__type-input visually-hidden"
                     type="radio"
                     name="event-type"
-                    value="${offerGroup.type}"
+                    value="${he.encode(offerGroup.type)}"
                     ${offerGroup.type === type ? 'checked' : ''}
                   >
                   <label
-                    class="event__type-label event__type-label--${offerGroup.type}"
-                    for="event-type-${offerGroup.type}-new"
+                    class="event__type-label event__type-label--${he.encode(offerGroup.type)}"
+                    for="event-type-${he.encode(offerGroup.type)}-new"
                   >
-                    ${offerGroup.type}
+                    ${he.encode(offerGroup.type)}
                   </label>
                 </div>
               `).join('')}
@@ -60,7 +75,7 @@ function createNewPointFormTemplate(state, allOffers, destinationsList) {
         <!-- DESTINATION -->
         <div class="event__field-group event__field-group--destination">
           <label class="event__label event__type-output" for="event-destination-new">
-            ${type}
+            ${he.encode(type)}
           </label>
           <input
             class="event__input event__input--destination"
@@ -73,7 +88,7 @@ function createNewPointFormTemplate(state, allOffers, destinationsList) {
 
           <datalist id="destination-list-new">
             ${destinationsList.map((destinationItem) => `
-              <option value="${destinationItem.name}"></option>`).join('')}
+              <option value="${he.encode(destinationItem.name)}"></option>`).join('')}
           </datalist>
         </div>
 
@@ -85,7 +100,7 @@ function createNewPointFormTemplate(state, allOffers, destinationsList) {
             id="event-start-time-new"
             type="text"
             name="event-start-time"
-            value="${dayjs(dateFrom).format('DD/MM/YY HH:mm')}"
+            value="${dateFrom ? he.encode(dayjs(dateFrom).format('DD/MM/YY HH:mm')) : ''}"
           >
 
           &mdash;
@@ -96,7 +111,7 @@ function createNewPointFormTemplate(state, allOffers, destinationsList) {
             id="event-end-time-new"
             type="text"
             name="event-end-time"
-            value="${dayjs(dateTo).format('DD/MM/YY HH:mm')}"
+            value="${dateTo ? he.encode(dayjs(dateTo).format('DD/MM/YY HH:mm')) : ''}"
           >
         </div>
 
@@ -111,7 +126,7 @@ function createNewPointFormTemplate(state, allOffers, destinationsList) {
             id="event-price-new"
             type="text"
             name="event-price"
-            value="${basePrice}"
+            value="${he.encode(String(basePrice))}"
           >
         </div>
 
@@ -126,21 +141,7 @@ function createNewPointFormTemplate(state, allOffers, destinationsList) {
           <section class="event__section event__section--offers">
             <h3 class="event__section-title event__section-title--offers">Offers</h3>
             <div class="event__available-offers">
-              ${availableOffers.map((offerItem) => `
-                <div class="event__offer-selector">
-                  <input
-                    class="event__offer-checkbox visually-hidden"
-                    id="event-offer-${offerItem.id}-new"
-                    type="checkbox"
-                    data-offer-id="${offerItem.id}"
-                    ${offers.includes(offerItem.id) ? 'checked' : ''}
-                  >
-                  <label class="event__offer-label" for="event-offer-${offerItem.id}-new">
-                    <span class="event__offer-title">${offerItem.title}</span>
-                    &plus;&euro;&nbsp;<span class="event__offer-price">${offerItem.price}</span>
-                  </label>
-                </div>
-              `).join('')}
+              ${offersTemplate}
             </div>
           </section>
         ` : ''}
@@ -149,12 +150,12 @@ function createNewPointFormTemplate(state, allOffers, destinationsList) {
         ${destinationData.description ? `
           <section class="event__section event__section--destination">
             <h3 class="event__section-title event__section-title--destination">Destination</h3>
-            <p class="event__destination-description">${destinationData.description}</p>
+            <p class="event__destination-description">${he.encode(destinationData.description)}</p>
 
             <div class="event__photos-container">
               <div class="event__photos-tape">
                 ${destinationData.pictures.map((pictureItem) => `
-                  <img class="event__photo" src="${pictureItem.src}" alt="${pictureItem.description}">`).join('')}
+                  <img class="event__photo" src="${he.encode(pictureItem.src)}" alt="${he.encode(pictureItem.description)}">`).join('')}
               </div>
             </div>
           </section>
@@ -181,7 +182,6 @@ export default class NewPointFormView extends AbstractPointFormView {
 
     this._setState(POINT_EMPTY);
 
-    //this._restoreHandlers();
   }
 
   get template() {
@@ -197,9 +197,10 @@ export default class NewPointFormView extends AbstractPointFormView {
 
     // DESTINATION
     this.element.querySelector('.event__input--destination')
-      .addEventListener('change', (event) => {
-        this._handleDestinationChange(event, this.#destinations);
+      .addEventListener('input', (evt) => {
+        this._handleDestinationChange(evt, this.#destinations);
       });
+
 
     // PRICE
     this.element.querySelector('.event__input--price')
@@ -237,12 +238,7 @@ export default class NewPointFormView extends AbstractPointFormView {
       (date) => this._setState({ dateFrom: date }),
       (date) => this._setState({ dateTo: date })
     );
+    this._validateForm();
   }
 
-  static parseStateToPoint(state) {
-    return {
-      ...state,
-      id: nanoid()
-    };
-  }
 }

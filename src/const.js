@@ -11,8 +11,6 @@ const DATA_DATES = {
   MAX_GAP: 21
 };
 
-const POINTS_COUNT = 7;
-
 
 const FilterType = {
   EVERYTHING: 'everything',
@@ -37,15 +35,16 @@ const UpdateType = {
   PATCH: 'PATCH',
   MINOR: 'MINOR',
   MAJOR: 'MAJOR',
+  INIT: 'INIT',
 };
 
 const POINT_EMPTY = {
   type: 'flight',
   destination: null,
-  dateFrom: new Date(),
-  dateTo: new Date(),
+  dateFrom: null,
+  dateTo: null,
   basePrice: 0,
   offers: []
 };
 
-export {PRICE, POINTS_COUNT, DATA_DATES, FilterType, SortType, UserAction, UpdateType, POINT_EMPTY};
+export {PRICE, DATA_DATES, FilterType, SortType, UserAction, UpdateType, POINT_EMPTY};

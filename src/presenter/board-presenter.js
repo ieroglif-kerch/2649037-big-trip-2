@@ -3,6 +3,7 @@ import FilterView from '../view/filter-view.js';
 import InfoView from '../view/info-view.js';
 import SortView from '../view/sort-view.js';
 import EmptyList from '../view/empty-list-view.js';
+import LoadingView from '../view/loading-view.js';
 import PointPresenter from './point-presenter.js';
 import NewPointPresenter from './new-point-presenter.js';
 import { FilterType, SortType, UpdateType, UserAction } from '../const.js';
@@ -15,6 +16,7 @@ export default class BoardPresenter {
 
   #currentFilter = FilterType.EVERYTHING;
   #currentSortType = SortType.DAY;
+  #loadingComponent = new LoadingView();
   #sortView = null;
   #filterView = null;
   #listContainer = null;
@@ -24,6 +26,8 @@ export default class BoardPresenter {
   #newPointPresenter = null;
 
   #message = null;
+
+  #isLoading = true;
 
   constructor({ infoContainer, boardContainer, wayPointsModel }) {
     this.#infoContainer = infoContainer;
@@ -123,6 +127,10 @@ export default class BoardPresenter {
       this.#sortView = null;
       this.#currentSortType = SortType.DAY;
     }
+    if (this.#loadingComponent){
+      remove(this.#loadingComponent);
+    }
+
   }
 
   #renderPointsList() {
@@ -158,6 +166,10 @@ export default class BoardPresenter {
   }
 
   #renderEmptyList() {
+    if (this.#isLoading) {
+      this.#renderLoading();
+      return;
+    }
     this.#message = new EmptyList(this.#currentFilter);
     render(this.#message, this.#boardContainer);
   }
@@ -221,17 +233,21 @@ export default class BoardPresenter {
         this.#clearPointsList({ resetSortType: true });
         this.#renderPointsList();
         break;
+      case UpdateType.INIT:
+        this.#isLoading = false;
+        remove(this.#loadingComponent);
+        this.#renderPointsList();
+        break;
     }
   };
 
   #newPointClickHandler = () => {
-    if (this.#newPointPresenter !== null) {
-      return;
-    }
-
+    // 1. Закрываем ВСЕ формы редактирования
+    this.#pointPresenters.forEach((presenter) => presenter.resetView());
+    // 2. Сброс фильтра и сортировки
     this.#sortView.reset();
     this.#filterView.reset();
-
+    // 3. Создание формы новой точки
     this.#newPointPresenter = new NewPointPresenter({
       container: this.#listContainer,
       offers: this.#wayPointsModel.events,
@@ -239,8 +255,8 @@ export default class BoardPresenter {
       onSubmit: this.#handleNewPointSubmit,
       onCancel: this.#handleNewPointCancel
     });
-
     this.#newPointPresenter.init();
+    //4. Отключаем кнопку "New event", чтобы нельзя было открыть две формы одновременно
     this.#newEventButton.disabled = true;
   };
 
@@ -250,7 +266,6 @@ export default class BoardPresenter {
       UpdateType.MINOR,
       newPoint
     );
-
     this.#destroyNewPointForm();
   };
 
@@ -262,10 +277,12 @@ export default class BoardPresenter {
     if (this.#newPointPresenter === null) {
       return;
     }
-
     this.#newPointPresenter.destroy();
     this.#newPointPresenter = null;
-
     this.#newEventButton.disabled = false;
+  }
+
+  #renderLoading() {
+    render(this.#loadingComponent, this.#boardContainer, 'afterbegin');
   }
 }

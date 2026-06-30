@@ -14,7 +14,6 @@ function createPointTemplate(point) {
     destination
   } = point;
 
-  // Форматирование дат через dayjs
   const start = dayjs(dateFrom);
   const end = dayjs(dateTo);
 
@@ -22,11 +21,10 @@ function createPointTemplate(point) {
   const startTime = start.format('HH:mm');
   const endTime = end.format('HH:mm');
 
-  // Офферы — массив объектов { id, title, price }
   const offersTemplate = offers.map((offer) => `
     <li class="event__offer">
-      <span class="event__offer-title">${offer.title}</span>
-      &plus;&euro;&nbsp;<span class="event__offer-price">${offer.price}</span>
+      <span class="event__offer-title">${he.encode(offer.title)}</span>
+      &plus;&euro;&nbsp;<span class="event__offer-price">${he.encode(String(offer.price))}</span>
     </li>
   `).join('');
 
@@ -35,25 +33,26 @@ function createPointTemplate(point) {
   return `
     <li class="trip-events__item">
       <div class="event">
-        <time class="event__date" datetime="${dateFrom}">${day}</time>
+        <time class="event__date" datetime="${he.encode(dateFrom)}">${he.encode(day)}</time>
 
         <div class="event__type">
-          <img class="event__type-icon" width="42" height="42" src="img/icons/${type}.png" alt="Event type icon">
+          <img class="event__type-icon" width="42" height="42"
+            src="img/icons/${he.encode(type)}.png" alt="Event type icon">
         </div>
 
-        <h3 class="event__title">${type} ${he.encode(destination)}</h3>
+        <h3 class="event__title">${he.encode(type)} ${he.encode(destination)}</h3>
 
         <div class="event__schedule">
           <p class="event__time">
-            <time class="event__start-time" datetime="${dateFrom}">${startTime}</time>
+            <time class="event__start-time" datetime="${he.encode(dateFrom)}">${he.encode(startTime)}</time>
             &mdash;
-            <time class="event__end-time" datetime="${dateTo}">${endTime}</time>
-            <p class="event__duration">${duration}</p>
+            <time class="event__end-time" datetime="${he.encode(dateTo)}">${he.encode(endTime)}</time>
+            <p class="event__duration">${he.encode(duration)}</p>
           </p>
         </div>
 
         <p class="event__price">
-          &euro;&nbsp;<span class="event__price-value">${basePrice}</span>
+          &euro;&nbsp;<span class="event__price-value">${he.encode(String(basePrice))}</span>
         </p>
 
         <h4 class="visually-hidden">Offers:</h4>
