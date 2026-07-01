@@ -40,7 +40,7 @@ export default class AbstractPointFormView extends AbstractStatefulView {
         this.#endDatepicker.set('minDate', date);// обновляем ограничение конца
         if (this._state.dateTo < date) {
           // если конец уже раньше старта — двигаем конец
-          const newEnd = date;
+          const newEnd = new Date(date.getTime() + 5 * 60 * 1000);
           onEnd(newEnd);
           this.#endDatepicker.setDate(newEnd, false);
         }

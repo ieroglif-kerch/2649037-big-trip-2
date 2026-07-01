@@ -43,6 +43,7 @@ const POINT_EMPTY = {
   destination: null,
   dateFrom: null,
   dateTo: null,
+  isFavorite: false,
   basePrice: 0,
   offers: []
 };
