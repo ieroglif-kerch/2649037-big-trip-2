@@ -1,6 +1,8 @@
 import AbstractView from '../framework/view/abstract-view.js';
 import dayjs from 'dayjs';
 
+const CITY_MAX_COUNT = 3;
+
 function createInfoTemplate({ routeString, datesString, totalCost }) {
   return (
     `<section class="trip-main__trip-info trip-info">
@@ -43,7 +45,7 @@ export default class InfoView extends AbstractView {
       return firstCity;
     }
 
-    if (citiesCount <= 3) {
+    if (citiesCount <= CITY_MAX_COUNT) {
       return `${firstCity}&nbsp;&mdash;&nbsp;${lastCity}`;
     }
 
