@@ -414,6 +414,24 @@ export default class NewPointFormView extends AbstractStatefulView {
     saveButton.disabled = !isValid;
   }
 
+  reset(point) {
+    this.updateElement(NewPointFormView.parsePointToState(point));
+  }
+
+  updateElement(update) {
+    this._setState(update);
+
+    const previousElement = this.element;
+    const parent = previousElement.parentElement;
+
+    this.removeElement();// уничтожает datepickers
+    const newElement = this.element; // пересоздаёт DOM и вызывает _restoreHandlers()
+
+    if (parent !== null) {
+      parent.replaceChild(newElement, previousElement);
+    }
+  }
+
   static parsePointToState(point) {
     return {
       ...point,
