@@ -71,9 +71,15 @@ export default class BoardPresenter {
     });
 
     // Рендер фильтров
-    this.#filterView = new FilterView({ onFilterChange: this.#handleFilterChange });
-    render(this.#filterView, this.#filterContainer);
+    const filtersAvailability = this.#getFiltersAvailability();
 
+    this.#filterView = new FilterView({
+      onFilterChange: this.#handleFilterChange,
+      filtersAvailability
+    });
+
+    render(this.#filterView, this.#filterContainer);
+    //this.#filterView.updateDisabled(filtersAvailability);
 
     this.#renderPointsList();
   }
@@ -98,6 +104,32 @@ export default class BoardPresenter {
         return points;
     }
   }
+
+  #getFiltersAvailability() {
+    const points = this.#wayPointsModel.points;
+    const now = new Date();
+
+    return {
+      [FilterType.EVERYTHING]: points.length > 0,
+
+      [FilterType.FUTURE]: points.some((pointItem) => {
+        const pointDateFrom = new Date(pointItem.dateFrom);
+        return pointDateFrom > now;
+      }),
+
+      [FilterType.PRESENT]: points.some((pointItem) => {
+        const pointDateFrom = new Date(pointItem.dateFrom);
+        const pointDateTo = new Date(pointItem.dateTo);
+        return pointDateFrom <= now && pointDateTo >= now;
+      }),
+
+      [FilterType.PAST]: points.some((pointItem) => {
+        const pointDateTo = new Date(pointItem.dateTo);
+        return pointDateTo < now;
+      })
+    };
+  }
+
 
   #renderSortView() {
     this.#sortView = new SortView({ onSortChange: this.#handleSortChange });
@@ -161,7 +193,7 @@ export default class BoardPresenter {
         this.#pointPresenters.set(point.id, presenter);
       });
     } else {
-      this.#clearPointsList(true);
+      this.#clearPointsList();
       this.#renderEmptyList();
 
     }
@@ -192,7 +224,9 @@ export default class BoardPresenter {
     }
     this.#clearPointsList();
     this.#renderPointsList();
+    this.#filterView.updateDisabled(this.#getFiltersAvailability());
   };
+
 
   #handleSortChange = (sortType) => {
     if (this.#currentSortType === sortType) {
@@ -249,16 +283,19 @@ export default class BoardPresenter {
       case UpdateType.MINOR:
         // - обновить список
         this.#clearPointsList();
+
+        this.#filterView.updateDisabled(this.#getFiltersAvailability());
         this.#renderPointsList();
         break;
       case UpdateType.MAJOR:
         // - обновить всю доску
-        this.#clearPointsList({ resetSortType: true });
+        this.#clearPointsList(true);
         this.#renderPointsList();
         break;
       case UpdateType.INIT:
         this.#isLoading = false;
         remove(this.#loadingComponent);
+        this.#filterView.updateDisabled(this.#getFiltersAvailability());
         this.#renderPointsList();
         break;
     }
@@ -270,6 +307,7 @@ export default class BoardPresenter {
     // 2. Сброс фильтра и сортировки
     this.#sortView.reset();
     this.#filterView.reset();
+    this.#filterView.updateDisabled(this.#getFiltersAvailability());
     // 3. Создание формы новой точки
     this.#newPointPresenter = new NewPointPresenter({
       container: this.#listContainer,
