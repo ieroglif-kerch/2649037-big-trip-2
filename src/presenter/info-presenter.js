@@ -15,7 +15,6 @@ export default class InfoPresenter {
   }
 
   init() {
-    //this.#renderInfo();
   }
 
   #renderInfo() {

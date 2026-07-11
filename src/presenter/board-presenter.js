@@ -178,10 +178,7 @@ export default class BoardPresenter {
         this.#renderSortView();
       }
 
-      // Создаём контейнер списка
-      this.#listContainer = document.createElement('ul');
-      this.#listContainer.classList.add('trip-events__list');
-      this.#boardContainer.append(this.#listContainer);
+      this.#createListContainer();
 
       // Создаём точки
       this.points.forEach((point) => {
@@ -335,10 +332,19 @@ export default class BoardPresenter {
     // 1. Закрываем ВСЕ формы редактирования
     this.#pointPresenters.forEach((presenter) => presenter.resetView());
     // 2. Сброс фильтра и сортировки
-    this.#sortView.reset();
+    if (this.#sortView) {
+      this.#sortView.reset();
+    }
     this.#filterView.reset();
     this.#filterView.updateDisabled(this.#getFiltersAvailability());
-    // 3. Создание формы новой точки
+    // Удаляем EmptyList, если он есть
+    if (this.#message) {
+      remove(this.#message);
+      this.#message = null;
+    }
+    // 3. Создание списка, если его нет
+    this.#createListContainer();
+    // 4. Создание формы новой точки
     this.#newPointPresenter = new NewPointPresenter({
       container: this.#listContainer,
       offers: this.#wayPointsModel.events,
@@ -347,7 +353,7 @@ export default class BoardPresenter {
       onCancel: this.#handleNewPointCancel
     });
     this.#newPointPresenter.init();
-    //4. Отключаем кнопку "New event", чтобы нельзя было открыть две формы одновременно
+    //5. Отключаем кнопку "New event", чтобы нельзя было открыть две формы одновременно
     this.#newEventButton.disabled = true;
   };
 
@@ -375,5 +381,13 @@ export default class BoardPresenter {
 
   #renderLoading() {
     render(this.#loadingComponent, this.#boardContainer, 'afterbegin');
+  }
+
+  #createListContainer() {
+    if (!this.#listContainer) {
+      this.#listContainer = document.createElement('ul');
+      this.#listContainer.classList.add('trip-events__list');
+      this.#boardContainer.append(this.#listContainer);
+    }
   }
 }
