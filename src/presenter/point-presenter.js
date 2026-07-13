@@ -14,8 +14,6 @@ export default class PointPresenter {
   #editComponent = null;
   #listContainer = null;
   #point = null;
-  #allEvents = null;
-  #destinationsList = null;
   #pointsModel = null;
   #handleDataChange = null;
   #handleModeChange = null;

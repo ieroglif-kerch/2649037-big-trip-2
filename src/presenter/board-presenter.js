@@ -10,10 +10,10 @@ import UiBlocker from '../framework/ui-blocker/ui-blocker.js';
 import { FilterType, SortType, UpdateType, UserAction, TimeLimit } from '../const.js';
 
 export default class BoardPresenter {
-  #infoContainer = {};
-  #filterContainer = {};
-  #boardContainer = {};
-  #wayPointsModel = {};
+  #infoContainer = null;
+  #filterContainer = null;
+  #boardContainer = null;
+  #wayPointsModel = null;
 
   #currentFilter = FilterType.EVERYTHING;
   #currentSortType = SortType.DAY;
@@ -80,7 +80,6 @@ export default class BoardPresenter {
     });
 
     render(this.#filterView, this.#filterContainer);
-    //this.#filterView.updateDisabled(filtersAvailability);
 
     this.#renderPointsList();
   }
