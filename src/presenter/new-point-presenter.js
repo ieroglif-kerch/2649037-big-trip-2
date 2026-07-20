@@ -27,7 +27,7 @@ export default class NewPointPresenter {
     });
 
     render(this.#formComponent, this.#container, 'afterbegin');
-    this.#formComponent._restoreHandlers();
+    this.#formComponent.restoreHandlers();
 
     document.addEventListener('keydown', this.#escKeyDownHandler);
   }

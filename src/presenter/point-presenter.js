@@ -96,7 +96,7 @@ export default class PointPresenter {
 
   #replaceCardToForm = () => {
     replace(this.#editComponent, this.#component);
-    this.#editComponent._restoreHandlers();
+    this.#editComponent.restoreHandlers();
     document.addEventListener('keydown', this.#escKeyDownHandler);
     this.#handleModeChange();
     this.#mode = Mode.EDITING;

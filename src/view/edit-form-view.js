@@ -36,9 +36,9 @@ export default class EditFormView extends NewPointFormView {
   }
 
 
-  _restoreHandlers() {
+  restoreHandlers() {
     // сначала общие обработчики
-    super._restoreHandlers();
+    super.restoreHandlers();
 
     // DELETE
     const deleteButton = this.element.querySelector('.event__reset-btn');
