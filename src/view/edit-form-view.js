@@ -49,11 +49,6 @@ export default class EditFormView extends NewPointFormView {
     rollupButton.addEventListener('click', this.#onRollupButtonClick);
   }
 
-  // updateElement(update) {
-  //   super.updateElement(update);
-  //   this._restoreHandlers();
-  // }
-
   #onDeleteButtonClick = (evt) => {
     evt.preventDefault();
     this.#handleDelete(EditFormView.parseStateToPoint(this._state));
